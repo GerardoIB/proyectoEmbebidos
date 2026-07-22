@@ -1,0 +1,387 @@
+/* Tanque 3D realista con efectos de agua mejorados */
+.tank-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  perspective: 1000px;
+}
+
+.tank-wrapper {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(3deg);
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.4));
+}
+
+/* Estructura del tanque */
+.tank {
+  position: relative;
+  width: 180px;
+  height: 280px;
+  transform-style: preserve-3d;
+}
+
+.tank-wall {
+  position: absolute;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.15),
+    0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+/* Pared frontal */
+.tank-front {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12) 0%,
+    rgba(59, 130, 246, 0.04) 50%,
+    rgba(59, 130, 246, 0.12) 100%
+  );
+  border: 3px solid rgba(59, 130, 246, 0.25);
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* Pared lateral */
+.tank-side {
+  width: 35px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(59, 130, 246, 0.18) 0%,
+    rgba(59, 130, 246, 0.08) 100%
+  );
+  border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.tank-side.left {
+  left: -17px;
+  transform: rotateY(-50deg);
+  transform-origin: right center;
+}
+
+.tank-side.right {
+  right: -17px;
+  transform: rotateY(50deg);
+  transform-origin: left center;
+}
+
+/* Pared superior */
+.tank-top {
+  width: calc(100% - 35px);
+  height: 25px;
+  left: 17px;
+  top: -12px;
+  background: linear-gradient(
+    180deg,
+    rgba(59, 130, 246, 0.25) 0%,
+    rgba(59, 130, 246, 0.08) 100%
+  );
+  border: 2px solid rgba(59, 130, 246, 0.25);
+  border-radius: 12px 12px 0 0;
+  transform: rotateX(50deg);
+  transform-origin: bottom center;
+}
+
+/* Pared inferior */
+.tank-bottom {
+  width: calc(100% - 35px);
+  height: 25px;
+  left: 17px;
+  bottom: -12px;
+  background: linear-gradient(
+    180deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(59, 130, 246, 0.18) 100%
+  );
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 0 0 12px 12px;
+  transform: rotateX(-50deg);
+  transform-origin: top center;
+}
+
+/* Agua */
+.water {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(37, 99, 235, 0.5) 0%,
+    rgba(29, 78, 216, 0.7) 50%,
+    rgba(30, 64, 175, 0.85) 100%
+  );
+  transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Ondas en la superficie del agua */
+.water::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: -15%;
+  width: 130%;
+  height: 24px;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(59, 130, 246, 0.7) 0%, transparent 70%);
+  animation: wave 2.5s ease-in-out infinite;
+}
+
+.water::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -8%;
+  width: 116%;
+  height: 18px;
+  background:
+    radial-gradient(ellipse at 30% 100%, rgba(96, 165, 250, 0.5) 0%, transparent 60%);
+  animation: wave 2s ease-in-out infinite reverse;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateX(-8%) scaleY(1);
+  }
+  50% {
+    transform: translateX(8%) scaleY(1.3);
+  }
+}
+
+/* Burbujas */
+.bubbles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -20px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(147, 197, 253, 0.7),
+    rgba(59, 130, 246, 0.3)
+  );
+  border-radius: 50%;
+  animation: rise 3.5s ease-in infinite;
+}
+
+.bubble:nth-child(1) {
+  left: 15%;
+  width: 10px;
+  height: 10px;
+  animation-delay: 0s;
+  animation-duration: 3s;
+}
+
+.bubble:nth-child(2) {
+  left: 45%;
+  width: 7px;
+  height: 7px;
+  animation-delay: 0.8s;
+  animation-duration: 3.8s;
+}
+
+.bubble:nth-child(3) {
+  left: 65%;
+  width: 12px;
+  height: 12px;
+  animation-delay: 1.5s;
+  animation-duration: 3.2s;
+}
+
+.bubble:nth-child(4) {
+  left: 30%;
+  width: 5px;
+  height: 5px;
+  animation-delay: 0.4s;
+  animation-duration: 4s;
+}
+
+.bubble:nth-child(5) {
+  left: 75%;
+  width: 8px;
+  height: 8px;
+  animation-delay: 1.2s;
+  animation-duration: 3.5s;
+}
+
+@keyframes rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-260px) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* Brillo y reflexión */
+.water-shine {
+  position: absolute;
+  top: 8%;
+  left: 8%;
+  width: 35%;
+  height: 75%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Medidor de nivel */
+.tank-level-indicator {
+  position: absolute;
+  right: 12px;
+  top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-mark {
+  width: 12px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.25);
+  position: relative;
+}
+
+.level-mark::after {
+  content: attr(data-value);
+  position: absolute;
+  right: 18px;
+  top: -5px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.level-mark.critical {
+  background: rgba(239, 68, 68, 0.7);
+}
+
+.level-mark.warning {
+  background: rgba(234, 179, 8, 0.7);
+}
+
+/* Porcentaje grande */
+.tank-percentage {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+  margin-top: 1.5rem;
+  transition: color 0.5s ease, text-shadow 0.5s ease;
+}
+
+.tank-percentage.critical {
+  color: #f87171;
+  text-shadow: 0 2px 20px rgba(239, 68, 68, 0.5);
+  animation: pulse-critical 1s ease-in-out infinite;
+}
+
+.tank-percentage.warning {
+  color: #facc15;
+  text-shadow: 0 2px 15px rgba(234, 179, 8, 0.4);
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Etiqueta del nivel */
+.tank-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+/* Indicador de capacidad */
+.tank-capacity {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 0.25rem;
+  font-weight: 300;
+}
+
+/* Estado de conexión */
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  margin-top: 1rem;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+
+.status-dot.connected {
+  background: #22c55e;
+  box-shadow: 0 0 12px #22c55e;
+}
+
+.status-dot.disconnected {
+  background: #ef4444;
+  animation: none;
+}
+
+.status-dot.stale {
+  background: #eab308;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .tank {
+    width: 140px;
+    height: 220px;
+  }
+
+  .tank-percentage {
+    font-size: 2.5rem;
+  }
+
+  .tank-label {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+  }
+}
