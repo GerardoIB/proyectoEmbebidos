@@ -15,10 +15,9 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_PORT}}
           script: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            export PATH="/home/azureuser/.nvm/versions/node/v24.18.0/bin:/home/azureuser/.local/share/pnpm/bin:$PATH"
             cd ~/front-end-Embebidos
-            git fetch origin main 
+            git fetch origin main
             git reset --hard origin/main
             pnpm install --frozen-lockfile
             pm2 restart frontIoT
