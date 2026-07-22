@@ -20,4 +20,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             pnpm install --frozen-lockfile
+            rm -rf dist
+            pnpm build
+            sudo systemctl restart nginx
             pm2 restart frontIoT

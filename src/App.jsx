@@ -19,11 +19,13 @@ const isDemoEnabled = import.meta.env.VITE_DEMO_MODE === 'true' || (import.meta.
 function Dashboard() {
   const { user, logout } = useAuth();
   const demo = useDemo();
-  const mqtt = useMqtt();
 
   const [userDevices, setUserDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [loadingDevices, setLoadingDevices] = useState(!isDemoEnabled);
+
+  // Hook MQTT real por dispositivo
+  const mqtt = useMqtt(selectedDeviceId);
 
   // Cargar dispositivos si estamos conectándonos a la API real
   const loadDevices = useCallback(async () => {
@@ -46,10 +48,10 @@ function Dashboard() {
     loadDevices();
   }, [loadDevices]);
 
-  // Hook de API real con el dispositivo seleccionado
+  // Hook de API real con el dispositivo seleccionado (para carga inicial / fallback / historial)
   const api = useWaterAPI(selectedDeviceId);
 
-  // Polling regular cuando el modo backend está activo
+  // Polling regular como respaldo cuando el modo backend está activo y MQTT no esté transmitiendo
   useEffect(() => {
     if (isDemoEnabled || !selectedDeviceId) return;
 
@@ -60,8 +62,15 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, [selectedDeviceId, api]);
 
-  // Seleccionar qué fuente de datos mostrar (Demo o Backend real API / MQTT)
-  const datos = isDemoEnabled ? demo : {
+  // Seleccionar qué fuente de datos mostrar (Demo, MQTT en tiempo real, o API REST de respaldo)
+  const usaMqttTiempoReal = !isDemoEnabled && mqtt.conectado && mqtt.nivel !== null;
+
+  const datos = isDemoEnabled ? demo : usaMqttTiempoReal ? {
+    nivel: mqtt.nivel,
+    bombaEncendida: mqtt.bombaEncendida,
+    conectado: true,
+    isStale: mqtt.isStale,
+  } : {
     nivel: api.nivel ?? 0,
     bombaEncendida: api.bombaEncendida ?? false,
     conectado: api.conectado,
@@ -216,7 +225,7 @@ function Dashboard() {
                       </svg>
                     </div>
                     <div className="metric-info">
-                      <span className="metric-value">{isDemoEnabled ? '3s' : '5s'}</span>
+                      <span className="metric-value">{isDemoEnabled ? '3s (Demo)' : usaMqttTiempoReal ? 'Tiempo Real (MQTT)' : '5s (API REST)'}</span>
                       <span className="metric-label">Frecuencia</span>
                     </div>
                   </div>
