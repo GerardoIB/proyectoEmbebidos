@@ -11,6 +11,8 @@ export function useMqtt(deviceId) {
   const [bombaEncendida, setBombaEncendida] = useState(false);
   const [conectado, setConectado] = useState(false);
   const [error, setError] = useState(null);
+  const [ultimaLecturaAt, setUltimaLecturaAt] = useState(null);
+  const [mensajesRecibidos, setMensajesRecibidos] = useState(0);
   const clientRef = useRef(null);
   const lastUpdateRef = useRef(Date.now());
 
@@ -25,17 +27,20 @@ export function useMqtt(deviceId) {
         payload = payloadStr;
       }
 
+      const now = new Date();
+      setUltimaLecturaAt(now);
+      setMensajesRecibidos(prev => prev + 1);
+      lastUpdateRef.current = now.getTime();
+
       if (typeof payload === 'object' && payload !== null) {
         if (payload.nivel !== undefined) {
           setNivel(Math.min(100, Math.max(0, Number(payload.nivel))));
-          lastUpdateRef.current = Date.now();
         }
         if (payload.bomba !== undefined || payload.bombaEncendida !== undefined) {
           setBombaEncendida(Boolean(payload.bomba ?? payload.bombaEncendida));
         }
       } else if (topic === MQTT_CONFIG.topicLevel || topic.endsWith('/nivel')) {
         setNivel(Math.min(100, Math.max(0, Number(payload))));
-        lastUpdateRef.current = Date.now();
       } else if (topic === MQTT_CONFIG.topicPump || topic.endsWith('/bomba')) {
         setBombaEncendida(Boolean(payload === 'true' || payload === true || payload === 1 || payload === '1'));
       }
@@ -111,10 +116,12 @@ export function useMqtt(deviceId) {
 
   return {
     nivel,
-    bombaEncendida: bombaEncendida,
+    bombaEncendida,
     conectado,
     error,
     isStale,
+    ultimaLecturaAt,
+    mensajesRecibidos,
     getTiempoUltimaActualizacion,
   };
 }

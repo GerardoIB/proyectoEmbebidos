@@ -65,16 +65,22 @@ function Dashboard() {
   // Seleccionar qué fuente de datos mostrar (Demo, MQTT en tiempo real, o API REST de respaldo)
   const usaMqttTiempoReal = !isDemoEnabled && mqtt.conectado && mqtt.nivel !== null;
 
-  const datos = isDemoEnabled ? demo : usaMqttTiempoReal ? {
+  const datos = isDemoEnabled ? {
+    ...demo,
+    ultimaActualizacion: new Date(),
+  } : usaMqttTiempoReal ? {
     nivel: mqtt.nivel,
     bombaEncendida: mqtt.bombaEncendida,
     conectado: true,
     isStale: mqtt.isStale,
+    ultimaActualizacion: mqtt.ultimaLecturaAt || new Date(),
+    mensajesRecibidos: mqtt.mensajesRecibidos,
   } : {
     nivel: api.nivel ?? 0,
     bombaEncendida: api.bombaEncendida ?? false,
     conectado: api.conectado,
     isStale: !api.conectado,
+    ultimaActualizacion: api.lastSeen ? new Date(api.lastSeen) : new Date(),
   };
 
   const selectedDeviceObj = userDevices.find(d => d.id === selectedDeviceId);
@@ -188,7 +194,7 @@ function Dashboard() {
                 nivel={datos.nivel}
                 bombaEncendida={datos.bombaEncendida}
                 conectada={datos.conectado}
-                ultimaActualizacion={new Date()}
+                ultimaActualizacion={datos.ultimaActualizacion}
                 onRecargar={() => isDemoEnabled ? null : api.fetchAll(selectedDeviceId)}
                 cargando={api.cargando}
               />
