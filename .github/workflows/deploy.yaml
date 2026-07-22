@@ -23,4 +23,4 @@ jobs:
             rm -rf dist
             pnpm build
             sudo systemctl restart nginx
-            pm2 restart frontIoT
+ 
